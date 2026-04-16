@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+// Known issue: When deployed to IPFS without VERCEL_PROJECT_PRODUCTION_URL set, baseUrl falls back to localhost:3000 and OG image unfurling breaks.
 const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
   ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
   : `http://localhost:${process.env.PORT || 3000}`;

@@ -3,8 +3,13 @@
 import { useState } from "react";
 import { formatClawd } from "./format";
 import { erc20Abi, parseUnits } from "viem";
-import { useAccount, useWriteContract } from "wagmi";
-import { useScaffoldReadContract, useScaffoldWriteContract, useTransactor } from "~~/hooks/scaffold-eth";
+import { useAccount, useChainId, useSwitchChain, useWriteContract } from "wagmi";
+import {
+  useScaffoldReadContract,
+  useScaffoldWriteContract,
+  useTargetNetwork,
+  useTransactor,
+} from "~~/hooks/scaffold-eth";
 import { useClawdToken } from "~~/hooks/useClawdToken";
 import { notification } from "~~/utils/scaffold-eth";
 
@@ -16,8 +21,13 @@ type Props = {
 
 export const FundForm = ({ proposalId, remaining, status }: Props) => {
   const { address } = useAccount();
+  const chainId = useChainId();
+  const { targetNetwork } = useTargetNetwork();
+  const { switchChain } = useSwitchChain();
   const { tokenAddress, spender, symbol, decimals, balance, allowance, refetchAllowance } = useClawdToken();
   const [amount, setAmount] = useState("");
+  const [approvalSubmitting, setApprovalSubmitting] = useState(false);
+  const [approveCooldown, setApproveCooldown] = useState(false);
 
   const { data: myContribution } = useScaffoldReadContract({
     contractName: "ClawdFundMe",
@@ -56,6 +66,7 @@ export const FundForm = ({ proposalId, remaining, status }: Props) => {
 
   const onApprove = async () => {
     if (!tokenAddress || !spender || clampedAmount === 0n) return;
+    setApprovalSubmitting(true);
     try {
       await writeTx(() =>
         writeApprove({
@@ -65,9 +76,13 @@ export const FundForm = ({ proposalId, remaining, status }: Props) => {
           args: [spender, clampedAmount],
         }),
       );
+      setApproveCooldown(true);
       await refetchAllowance();
+      setTimeout(() => setApproveCooldown(false), 4000);
     } catch {
       // surfaced by transactor
+    } finally {
+      setApprovalSubmitting(false);
     }
   };
 
@@ -128,11 +143,18 @@ export const FundForm = ({ proposalId, remaining, status }: Props) => {
           </div>
         )}
 
-        {/* Known issue: No post-confirmation cooldown after approve; allowance may read stale and briefly flip back to "Approve" before refetchAllowance resolves. */}
         <div className="flex gap-2">
-          {needsApproval ? (
-            <button className="btn btn-primary flex-1" disabled={!hasBalance || isApproving} onClick={onApprove}>
-              {isApproving ? <span className="loading loading-spinner loading-sm" /> : null}
+          {address && chainId !== targetNetwork.id ? (
+            <button className="btn btn-warning flex-1" onClick={() => switchChain?.({ chainId: targetNetwork.id })}>
+              Switch to {targetNetwork.name}
+            </button>
+          ) : needsApproval ? (
+            <button
+              className="btn btn-primary flex-1"
+              disabled={!hasBalance || isApproving || approvalSubmitting || approveCooldown}
+              onClick={onApprove}
+            >
+              {isApproving || approvalSubmitting ? <span className="loading loading-spinner loading-sm" /> : null}
               Approve {formatClawd(clampedAmount, decimals)} {symbol}
             </button>
           ) : (

@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { parseUnits } from "viem";
-import { useAccount } from "wagmi";
-import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useAccount, useChainId, useSwitchChain } from "wagmi";
+import { useScaffoldWriteContract, useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { useClawdToken } from "~~/hooks/useClawdToken";
 import { notification } from "~~/utils/scaffold-eth";
 
@@ -15,6 +15,9 @@ const DURATIONS: { label: string; seconds: number }[] = [
 
 export const SubmitProposal = () => {
   const { address } = useAccount();
+  const chainId = useChainId();
+  const { targetNetwork } = useTargetNetwork();
+  const { switchChain } = useSwitchChain();
   const { decimals, symbol } = useClawdToken();
 
   const [description, setDescription] = useState("");
@@ -112,10 +115,16 @@ export const SubmitProposal = () => {
           </div>
         )}
 
-        <button className="btn btn-primary" disabled={!canSubmit} onClick={onSubmit}>
-          {isMining ? <span className="loading loading-spinner loading-sm" /> : null}
-          Submit proposal
-        </button>
+        {address && chainId !== targetNetwork.id ? (
+          <button className="btn btn-warning" onClick={() => switchChain?.({ chainId: targetNetwork.id })}>
+            Switch to {targetNetwork.name}
+          </button>
+        ) : (
+          <button className="btn btn-primary" disabled={!canSubmit} onClick={onSubmit}>
+            {isMining ? <span className="loading loading-spinner loading-sm" /> : null}
+            Submit proposal
+          </button>
+        )}
       </div>
     </div>
   );

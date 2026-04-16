@@ -39,6 +39,7 @@ const Home: NextPage = () => {
                 quality-proportional cut and releases the rest.
               </p>
             </div>
+            {/* Known issue: The deployed ClawdFundMe contract address is not surfaced here via <Address/>; consider adding it to a footer or info panel. */}
             <div className="stats stats-horizontal bg-base-100 shadow-sm border border-base-300 shrink-0">
               <div className="stat py-3 px-4">
                 <div className="stat-title text-xs">Proposals</div>
