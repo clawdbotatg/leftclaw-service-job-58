@@ -105,6 +105,7 @@ export const SubmitProposal = () => {
           </div>
         </div>
 
+        {/* Known issue: Disconnected state shows a warning alert rather than a ConnectButton; the header's connect button is the primary wallet entry point. */}
         {!address && (
           <div className="alert alert-warning text-sm py-2">
             <span>Connect your wallet to submit.</span>

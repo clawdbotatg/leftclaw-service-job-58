@@ -45,6 +45,7 @@ export const ProposalCard = ({ p }: { p: ProposalView }) => {
 
         <div>
           <div className="flex justify-between text-sm mb-1">
+            {/* Known issue: No USD conversion shown alongside CLAWD amounts; a CLAWD price feed is not readily available. */}
             <span className="font-semibold tabular-nums">
               {formatClawd(p.funded, decimals)} / {formatClawd(p.fundingGoal, decimals)} {symbol}
             </span>

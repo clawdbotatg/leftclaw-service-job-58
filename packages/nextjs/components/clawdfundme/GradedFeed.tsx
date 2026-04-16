@@ -42,6 +42,7 @@ export const GradedFeed = ({ totalCount }: { totalCount: number }) => {
                   </div>
                   <p className="font-medium mb-3">{p.description}</p>
 
+                  {/* Known issue: No USD conversion shown alongside CLAWD amounts; a CLAWD price feed is not readily available. */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                     <div className="flex items-center gap-2">
                       <span className="opacity-60">Builder:</span>

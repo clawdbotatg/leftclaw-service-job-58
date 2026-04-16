@@ -76,6 +76,21 @@ Visit our [docs](https://docs.scaffoldeth.io) to learn how to start building wit
 
 To know more about its features, check out our [website](https://scaffoldeth.io).
 
+## Known Issues
+
+- **No contributor escape hatch**: Contributor funds are locked until the owner calls `cancelProposal`. There is no on-chain way for contributors to withdraw if the owner is unresponsive.
+- **`ProposalStatus.GRADED` is unreachable**: The `grade()` function transitions directly from `FUNDED` to `SETTLED`; the `GRADED` enum value is never written.
+- **O(n) view functions**: `activeProposals()` and `allProposals()` loop over all proposals; for very large proposal counts these may exceed `eth_call` gas limits.
+- **`BLOCKS_PER_DAY` constant mismatch**: The constant assumes ~12 s/block; Base's actual cadence is ~2 s. The owner must supply `lateBlocks` relative to Base's true block rate.
+- **Redundant zero-address guard**: The `initialOwner == address(0)` check in the constructor is unreachable; OZ `Ownable` already reverts with `OwnableInvalidOwner` before it runs.
+- **Approval cooldown gap**: After approving CLAWD, the allowance may briefly read stale before the refetch resolves, causing the UI to momentarily show "Approve" again.
+- **Connect wallet as alert**: Disconnected users see a warning banner rather than a connect button in the action slot; the header connect button is the primary entry point.
+- **No USD conversion**: CLAWD amounts are shown without a fiat equivalent; a CLAWD price feed is not available.
+- **OG title template**: Sub-page tab titles still read "… | Scaffold-ETH 2" until the `titleTemplate` in `getMetadata.ts` is updated.
+- **No Phantom connector**: Phantom wallet is not in the RainbowKit connector list; mobile users on non-in-app browsers may have a degraded experience.
+- **Default WalletConnect project ID**: Falls back to a shared default if `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID` is unset; set your own project ID in Vercel env config for production.
+- **No reentrancy test**: `nonReentrant` guards are applied to `fund`, `grade`, and `refund`, but reentrancy via the CLAWD ERC20 is not exercised by the test suite.
+
 ## Contributing to Scaffold-ETH 2
 
 We welcome contributions to Scaffold-ETH 2!

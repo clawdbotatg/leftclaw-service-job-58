@@ -373,4 +373,6 @@ contract ClawdFundMeTest is Test {
         uint256 burned = clawd.balanceOf(BURN) - burnBefore;
         assertEq(paid + burned, goal);
     }
+
+    // Known issue: No explicit reentrancy test; nonReentrant guards are applied to fund, grade, and refund, but reentrancy via the CLAWD ERC20 is not exercised by the test suite.
 }

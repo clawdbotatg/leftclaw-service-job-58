@@ -115,6 +115,7 @@ export const FundForm = ({ proposalId, remaining, status }: Props) => {
           </button>
         </div>
 
+        {/* Known issue: Disconnected state shows a warning alert rather than a ConnectButton; the header's connect button is the primary wallet entry point. */}
         {!address && (
           <div className="alert alert-warning text-sm py-2">
             <span>Connect your wallet to fund this proposal.</span>
@@ -127,6 +128,7 @@ export const FundForm = ({ proposalId, remaining, status }: Props) => {
           </div>
         )}
 
+        {/* Known issue: No post-confirmation cooldown after approve; allowance may read stale and briefly flip back to "Approve" before refetchAllowance resolves. */}
         <div className="flex gap-2">
           {needsApproval ? (
             <button className="btn btn-primary flex-1" disabled={!hasBalance || isApproving} onClick={onApprove}>

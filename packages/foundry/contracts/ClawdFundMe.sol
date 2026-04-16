@@ -16,6 +16,7 @@ contract ClawdFundMe is Ownable, ReentrancyGuard {
     enum ProposalStatus {
         OPEN,
         FUNDED,
+        /// @notice Known issue: This status is never written; grade() transitions directly from FUNDED to SETTLED, leaving GRADED unreachable.
         GRADED,
         SETTLED,
         CANCELLED
@@ -57,6 +58,7 @@ contract ClawdFundMe is Ownable, ReentrancyGuard {
     // Dead address used as burn sink; many ERC20 impls revert on transfer to
     // address(0), so a non-recoverable burn address is the portable choice.
     address public constant BURN_ADDRESS = 0x000000000000000000000000000000000000dEaD;
+    /// @notice Known issue: BLOCKS_PER_DAY = 7200 assumes ~12 s/block but Base's cadence is ~2 s; the owner must supply lateBlocks in units consistent with Base's true block rate, not this constant.
     uint256 public constant BLOCKS_PER_DAY = 7200;
     uint256 public constant LATE_BURN_PER_DAY_PERCENT = 5;
     uint256 public constant MAX_LATE_BURN_PERCENT = 50;
@@ -105,6 +107,7 @@ contract ClawdFundMe is Ownable, ReentrancyGuard {
     error UnknownProposal();
 
     constructor(address clawdToken, address initialOwner) Ownable(initialOwner) {
+        /// @notice Known issue: The initialOwner == address(0) branch is unreachable; OZ Ownable's constructor already reverts with OwnableInvalidOwner before this guard runs.
         if (clawdToken == address(0) || initialOwner == address(0)) revert ZeroAddress();
         clawd = IERC20(clawdToken);
     }
@@ -217,6 +220,7 @@ contract ClawdFundMe is Ownable, ReentrancyGuard {
         emit Cancelled(proposalId);
     }
 
+    /// @notice Known issue: Contributor funds are locked until the owner calls cancelProposal; contributors have no on-chain escape hatch if the owner is unresponsive.
     /// @notice Contributor withdraws their CLAWD from a cancelled proposal.
     function refund(uint256 proposalId) external nonReentrant {
         Proposal storage p = _proposals[proposalId];
@@ -257,6 +261,7 @@ contract ClawdFundMe is Ownable, ReentrancyGuard {
         return _contributors[proposalId];
     }
 
+    /// @notice Known issue: activeProposals() and allProposals() are O(proposalCount); may exceed eth_call gas limits for very large proposal sets.
     /// @notice IDs of proposals currently accepting funding or awaiting grading.
     function activeProposals() external view returns (uint256[] memory ids) {
         uint256 total = proposalCount;

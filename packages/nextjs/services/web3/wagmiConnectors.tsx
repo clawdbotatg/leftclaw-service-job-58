@@ -17,6 +17,7 @@ const hasOnlyLocalTargetNetworks = targetNetworks.every(network => network.id ==
 const showBurnerWallet =
   burnerWalletMode !== "disabled" && (burnerWalletMode === "allNetworks" || hasOnlyLocalTargetNetworks);
 
+// Known issue: No Phantom connector included; mobile users on non-in-app browsers may have a degraded wallet connection experience.
 const wallets = [
   metaMaskWallet,
   walletConnectWallet,
